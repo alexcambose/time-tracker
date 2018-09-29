@@ -23,7 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
         // The code you place here will be executed every time your command is executed
 
         // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
+        vscode.window.showInformationMessage('Hello World!', 'ceva').then(e => {
+            console.log(e)
+        });
     });
     context.subscriptions.push(tab);
     context.subscriptions.push(disposable);
@@ -34,11 +36,16 @@ export function deactivate() {
 }
 const TIME_FORMAT_LONG: string = 'h [hours and] m [minutes]';
 const TIME_FORMAT_SHORT: string = 'h[h] mm[m]';
+const typeEnums = {
+    BREAK: 'break',
+    PAUSE: 'pause',
+    WORK: 'work',
+};
+
 export class TakeABreak {
     private _statusBarItem: StatusBarItem;
     protected currentTime: number = 10000;
-    protected workTimes<number> =[];
-    protected breaks: number = 0;
+    protected workTimes: object[] = [];
     protected inBreak: boolean = false;
     protected paused: boolean = false;
     protected invervalId: number;
@@ -56,34 +63,70 @@ export class TakeABreak {
         this.invervalId = setInterval(() => {
             this.setStatusBarText();
             this.currentTime++;
+            console.log(this.workTimes);
         }, 1000);
     }
-    public togglePause = () => {
+    public togglePause = (): void => {
         this.paused = !this.paused;
+        if (this.inBreak) {
+            vscode.window.showWarningMessage(`You can't pause because you are in a break`, 'Stop break').then(e => {
+                if (e) this.toggleBreak();
+            });
+            this.paused = !this.paused; // revert to original
+            return;
+        }
         if (this.paused) {
             clearInterval(this.invervalId);
+            this.createLog(typeEnums.PAUSE);
             vscode.window.showInformationMessage('Paused!');
-
-        }
-        else {
+        } else {
             this.createInterval();
+            this.createLog(typeEnums.WORK);
             vscode.window.showInformationMessage(this.paused ? 'Paused!' : 'Resumed!');
-
         }
         this.setStatusBarColor();
         this.setStatusBarTooltip();
+        this.setStatusBarText();
     }
+
+    public toggleBreak = (): void => {
+        this.inBreak = !this.inBreak;
+        if (this.inBreak) {
+            vscode.window.showInformationMessage('You are now taking a break!');
+            clearInterval(this.invervalId);
+
+            this.createLog(typeEnums.BREAK);
+        } else {
+            if (this.paused) {
+                this.createLog(typeEnums.PAUSE);
+                vscode.window.showInformationMessage('You are now only paused!');
+            } else {
+                this.createLog(typeEnums.WORK);
+                vscode.window.showInformationMessage('You are now working!');
+            }
+            this.createInterval();
+        }
+        this.setStatusBarColor();
+        this.setStatusBarTooltip();
+        this.setStatusBarText();
+    }
+
     public formatTime = (seconds: number, long: boolean = false): string => {
         /* tslint:disable-next-line */
         return moment.duration(seconds, "seconds").format(long ? TIME_FORMAT_LONG : TIME_FORMAT_SHORT);
     }
+
     public setStatusBarText = (): void => {
         let text: string = '';
         if (this.paused) text = '$(x)';
         else if (!this.paused) text = '$(triangle-right)';
-
+        if (this.inBreak) text = '$(clock)';
         text += ' ';
-        text += this.formatTime(this.currentTime);
+        if (this.inBreak) {
+            text += 'Taking a break';
+        } else {
+            text += this.formatTime(this.currentTime, this.paused);
+        }
         this._statusBarItem.text = text;
     }
 
@@ -97,10 +140,15 @@ export class TakeABreak {
 
     public setStatusBarColor = () => {
         let color;
-        if (this.paused) color = new vscode.ThemeColor('descriptionForeground');
+        if (this.paused || this.inBreak) color = new vscode.ThemeColor('descriptionForeground');
 
         this._statusBarItem.color = color;
     }
-
+    public createLog(type) {
+        this.workTimes.push({
+            type,
+            startime: (new Date()).getTime()
+        });
+    }
     public dispose = () => { this._statusBarItem.dispose(); }
 }
