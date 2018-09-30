@@ -1,5 +1,5 @@
 export enum TimeType {
-  Break,
-  Pause,
-  Work,
+  Break = 'b',
+  Pause = 'p',
+  Work = 'w',
 }

@@ -3,6 +3,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { TimeType } from './enums';
+import { TIME_FORMAT_LONG, TIME_FORMAT_SHORT } from './constants';
 import {
   window,
   workspace,
@@ -15,6 +16,7 @@ import {
 } from 'vscode';
 import * as moment from 'moment';
 import 'moment-duration-format';
+import Logger from './Logger';
 console.log('a');
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -42,11 +44,10 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {}
 
-
 export class TakeABreak {
   private _statusBarItem: StatusBarItem;
   protected currentTime: number = 10000;
-  protected workTimes: object[] = [];
+  protected logger: Logger = new Logger();
   protected inBreak: boolean = false;
   protected paused: boolean = false;
   protected invervalId: number;
@@ -58,13 +59,12 @@ export class TakeABreak {
     this.createInterval();
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
-    // vscode.commands.registerCommand('extension.togglePause', () => { });
   }
   public createInterval = () => {
     this.invervalId = setInterval(() => {
       this.setStatusBarText();
       this.currentTime++;
-      console.log(this.workTimes);
+      console.log(this.logger.workTimesToday);
     }, 1000);
   };
   public togglePause = (): void => {
@@ -83,11 +83,11 @@ export class TakeABreak {
     }
     if (this.paused) {
       clearInterval(this.invervalId);
-      this.createLog(TimeType.Pause);
+      this.logger.add(TimeType.Pause);
       vscode.window.showInformationMessage('Paused!');
     } else {
       this.createInterval();
-      this.createLog(TimeType.Work);
+      this.logger.add(TimeType.Work);
       vscode.window.showInformationMessage(
         this.paused ? 'Paused!' : 'Resumed!'
       );
@@ -105,13 +105,13 @@ export class TakeABreak {
       );
       clearInterval(this.invervalId);
 
-      this.createLog(TimeType.Break);
+      this.logger.add(TimeType.Break);
     } else {
       if (this.paused) {
-        this.createLog(TimeType.Pause);
+        this.logger.add(TimeType.Pause);
         vscode.window.showInformationMessage('You are now only paused!');
       } else {
-        this.createLog(TimeType.Work);
+        this.logger.add(TimeType.Work);
         vscode.window.showInformationMessage('You are now working!');
       }
       this.createInterval();
@@ -159,12 +159,6 @@ export class TakeABreak {
 
     this._statusBarItem.color = color;
   };
-  public createLog(type: TimeType) {
-    this.workTimes.push({
-      type,
-      startime: new Date().getTime(),
-    });
-  }
   public dispose = () => {
     this._statusBarItem.dispose();
   };
