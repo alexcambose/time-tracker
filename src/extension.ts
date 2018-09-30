@@ -17,25 +17,21 @@ import {
 import * as moment from 'moment';
 import 'moment-duration-format';
 import Logger from './Logger';
-console.log('a');
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "take-a-break" is now active!');
-  const tab = new TakeABreak();
+  const tab = new TakeABreak(context);
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
   let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-    // The code you place here will be executed every time your command is executed
-
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World!', 'ceva').then(e => {
-      console.log(e);
-    });
+    
   });
   context.subscriptions.push(tab);
   context.subscriptions.push(disposable);
@@ -47,12 +43,15 @@ export function deactivate() {}
 export class TakeABreak {
   private _statusBarItem: StatusBarItem;
   protected currentTime: number = 10000;
-  protected logger: Logger = new Logger();
+  protected logger: Logger;
   protected inBreak: boolean = false;
   protected paused: boolean = false;
+  protected context: vscode.ExtensionContext;
   protected invervalId: number;
 
-  constructor() {
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+    this.logger = new Logger(this.context);
     this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
     this._statusBarItem.command = 'extension.togglePause';
     this._statusBarItem.show();
