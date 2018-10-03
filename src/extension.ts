@@ -42,7 +42,7 @@ export function deactivate() {}
 
 export class TakeABreak {
   private _statusBarItem: StatusBarItem;
-  protected currentTime: number = 10000;
+  protected currentTime: number;
   protected logger: Logger;
   protected inBreak: boolean = false;
   protected paused: boolean = false;
@@ -53,33 +53,21 @@ export class TakeABreak {
     this.context = context;
     this.logger = new Logger(this.context);
     this.currentTime = this.logger.workSession;
+    if (this.currentTime) this.createInterval();
     this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
     this._statusBarItem.command = 'extension.togglePause';
     this._statusBarItem.show();
-    this.createInterval();
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
-    vscode.commands.registerCommand('extension.stopWorkSession', () => {
-      if (!this.logger.workSession) {
-        vscode.window.showWarningMessage(
-          `You can't stop a session because it is already stopped`
-        );
-        return;
-      }
-      this.logger.workSession = 0;
-      this.currentTime = this.logger.workSession;
-      vscode.window.showInformationMessage('Work session stopped!');
-    });
-    vscode.commands.registerCommand('extension.startWorkSession', () => {
-      if (this.logger.workSession) {
-        vscode.window.showWarningMessage(
-          `You can't start a session because it is already started`
-        );
-        return;
-      }
-      this.createInterval();
-      vscode.window.showInformationMessage('Work session started!');
-    });
+    vscode.commands.registerCommand(
+      'extension.stopWorkSession',
+      this.stopWorkSession
+    );
+    vscode.commands.registerCommand(
+      'extension.startWorkSession',
+      this.startWorkSession
+    );
+    this.recomputeStatusBar();
   }
   public createInterval = () => {
     this.invervalId = setInterval(() => {
@@ -87,9 +75,18 @@ export class TakeABreak {
       this.currentTime++;
       this.logger.workSession = this.currentTime;
       console.log(this.logger.workTimesToday);
-    }, 100);
+    }, 1000);
   };
+  public clearInterval() {
+    clearInterval(this.invervalId);
+  }
   public togglePause = (): void => {
+    // start work session if not started
+    if (!this.currentTime) {
+      this.startWorkSession();
+      return;
+    }
+
     this.paused = !this.paused;
     if (this.inBreak) {
       vscode.window
@@ -104,7 +101,7 @@ export class TakeABreak {
       return;
     }
     if (this.paused) {
-      clearInterval(this.invervalId);
+      this.clearInterval();
       this.logger.add(TimeType.Pause);
       vscode.window.showInformationMessage('Paused!');
     } else {
@@ -114,9 +111,7 @@ export class TakeABreak {
         this.paused ? 'Paused!' : 'Resumed!'
       );
     }
-    this.setStatusBarColor();
-    this.setStatusBarTooltip();
-    this.setStatusBarText();
+    this.recomputeStatusBar();
   };
 
   public toggleBreak = (): void => {
@@ -125,7 +120,7 @@ export class TakeABreak {
       vscode.window.showInformationMessage(
         `You are now taking a break! You have worked ${0} since the last break.`
       );
-      clearInterval(this.invervalId);
+      this.clearInterval();
 
       this.logger.add(TimeType.Break);
     } else {
@@ -138,9 +133,7 @@ export class TakeABreak {
       }
       this.createInterval();
     }
-    this.setStatusBarColor();
-    this.setStatusBarTooltip();
-    this.setStatusBarText();
+    this.recomputeStatusBar();
   };
 
   public formatTime = (seconds: number, long: boolean = false): string => {
@@ -149,15 +142,45 @@ export class TakeABreak {
       .duration(seconds, 'seconds')
       .format(long ? TIME_FORMAT_LONG : TIME_FORMAT_SHORT);
   };
-
-  public setStatusBarText = (): void => {
+  public startWorkSession = () => {
+    if (this.logger.workSession) {
+      vscode.window.showWarningMessage(
+        `You can't start a session because it is already started`
+      );
+      return;
+    }
+    vscode.window.showInformationMessage('Work session started!');
+    this.createInterval();
+    this.recomputeStatusBar();
+  };
+  public recomputeStatusBar = () => {
+    this.setStatusBarColor();
+    this.setStatusBarTooltip();
+    this.setStatusBarText();
+  };
+  public stopWorkSession = () => {
+    if (!this.logger.workSession) {
+      vscode.window.showWarningMessage(
+        `You can't stop a session because it is already stopped`
+      );
+      return;
+    }
+    this.logger.workSession = 0;
+    this.currentTime = this.logger.workSession;
+    vscode.window.showInformationMessage('Work session stopped!');
+    this.clearInterval();
+    this.recomputeStatusBar();
+  };
+  protected setStatusBarText = (): void => {
     let text: string = '';
     if (this.paused) text = '$(x)';
     else if (!this.paused) text = '$(triangle-right)';
     if (this.inBreak) text = '$(clock)';
     if (!this.logger.workSession) text = '$(flame)';
     text += ' ';
-    if (this.inBreak) {
+    if (!this.currentTime) {
+      text += 'Start work session!';
+    } else if (this.inBreak) {
       text += 'Taking a break';
     } else {
       text += this.formatTime(this.currentTime, this.paused);
@@ -165,7 +188,7 @@ export class TakeABreak {
     this._statusBarItem.text = text;
   };
 
-  public setStatusBarTooltip = (): string => {
+  protected setStatusBarTooltip = (): string => {
     let text: string = '';
     if (this.paused)
       text = `You worked for ${this.formatTime(this.currentTime, true)}!`;
@@ -175,7 +198,7 @@ export class TakeABreak {
     return text;
   };
 
-  public setStatusBarColor = () => {
+  protected setStatusBarColor = () => {
     let color;
     if (this.paused || this.inBreak)
       color = new vscode.ThemeColor('descriptionForeground');
