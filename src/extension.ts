@@ -21,7 +21,6 @@ import Logger from './Logger';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "take-a-break" is now active!');
@@ -30,9 +29,10 @@ export function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
-  let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-    
-  });
+  let disposable = vscode.commands.registerCommand(
+    'extension.sayHello',
+    () => {}
+  );
   context.subscriptions.push(tab);
   context.subscriptions.push(disposable);
 }
@@ -52,19 +52,42 @@ export class TakeABreak {
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.logger = new Logger(this.context);
+    this.currentTime = this.logger.workSession;
     this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
     this._statusBarItem.command = 'extension.togglePause';
     this._statusBarItem.show();
     this.createInterval();
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
+    vscode.commands.registerCommand('extension.stopWorkSession', () => {
+      if (!this.logger.workSession) {
+        vscode.window.showWarningMessage(
+          `You can't stop a session because it is already stopped`
+        );
+        return;
+      }
+      this.logger.workSession = 0;
+      this.currentTime = this.logger.workSession;
+      vscode.window.showInformationMessage('Work session stopped!');
+    });
+    vscode.commands.registerCommand('extension.startWorkSession', () => {
+      if (this.logger.workSession) {
+        vscode.window.showWarningMessage(
+          `You can't start a session because it is already started`
+        );
+        return;
+      }
+      this.createInterval();
+      vscode.window.showInformationMessage('Work session started!');
+    });
   }
   public createInterval = () => {
     this.invervalId = setInterval(() => {
       this.setStatusBarText();
       this.currentTime++;
+      this.logger.workSession = this.currentTime;
       console.log(this.logger.workTimesToday);
-    }, 1000);
+    }, 100);
   };
   public togglePause = (): void => {
     this.paused = !this.paused;
@@ -132,6 +155,7 @@ export class TakeABreak {
     if (this.paused) text = '$(x)';
     else if (!this.paused) text = '$(triangle-right)';
     if (this.inBreak) text = '$(clock)';
+    if (!this.logger.workSession) text = '$(flame)';
     text += ' ';
     if (this.inBreak) {
       text += 'Taking a break';

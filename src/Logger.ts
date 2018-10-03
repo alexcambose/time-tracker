@@ -3,11 +3,15 @@ import * as vscode from 'vscode';
 import * as moment from 'moment';
 import { STORAGE_DATE_FORMAT_ID } from './constants';
 import { ITimeBlock, ITimeDay } from './interfaces';
+/*
+Class that works only with data and time, provides a bridge for saving and retreiving data
+*/
 export default class Logger {
   private workTimes: ITimeBlock[] = [];
   private globalState: vscode.Memento;
   constructor(context: vscode.ExtensionContext) {
     this.globalState = context.globalState;
+    console.log('state', this.globalState);
   }
   public saveWorkTimes(): void {
     this.saveData(this.workTimes);
@@ -20,7 +24,14 @@ export default class Logger {
       [this.getCurrentDay()]: data,
     });
   }
-  protected getDataFromDay(time: string): ITimeBlock {
+  public getDataFromToday(type?: TimeType): ITimeBlock[] {
+    let data = this.getDataFromDay(this.getCurrentDay());
+    if (type) {
+      return data.filter(e => e.type === type);
+    }
+    return data;
+  }
+  public getDataFromDay(time: string): [ITimeBlock] {
     const allData: ITimeDay = this.globalState.get('times');
     return allData[time];
   }
@@ -38,6 +49,12 @@ export default class Logger {
     };
     this.workTimes.push(block);
     this.saveWorkTimes();
+  }
+  public get workSession(): number {
+    return this.globalState.get('workSession') || 0;
+  }
+  public set workSession(value: number) {
+    this.globalState.update('workSession', value);
   }
   public get workTimesToday(): object[] {
     return this.workTimes;
