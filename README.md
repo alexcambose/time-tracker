@@ -21,7 +21,6 @@ code --install-extension alexcambose.time-tracker
 - `Toggle Pause`: Start/Stop pause
 - `Toggle Break`: Start/Stop break
 
-- Click on the status bar item
 
 ## Features
 
