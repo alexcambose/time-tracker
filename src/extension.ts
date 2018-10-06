@@ -38,7 +38,9 @@ export class TimeTracker {
     this.context = context;
     this.logger = new Logger(this.context);
     this.currentTime = this.logger.workSession;
-    if (this.currentTime) this.createInterval();
+    if (this.currentTime) {
+      this.createInterval();
+    }
     this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
     this._statusBarItem.command = 'extension.togglePause';
     this._statusBarItem.show();
@@ -82,7 +84,9 @@ export class TimeTracker {
           'Stop break'
         )
         .then(e => {
-          if (e) this.toggleBreak();
+          if (e) {
+            this.toggleBreak();
+          }
         });
       this.paused = !this.paused; // revert to original
       return;
@@ -161,10 +165,15 @@ export class TimeTracker {
 
   protected setStatusBarText = (): void => {
     let text: string = '';
-    if (this.paused) text = '$(x)';
-    else if (this.inBreak) text = '$(clock)';
-    else if (!this.logger.workSession) text = '$(flame)';
-    else text = '$(triangle-right)';
+    if (this.paused) {
+      text = '$(x)';
+    } else if (this.inBreak) {
+      text = '$(clock)';
+    } else if (!this.logger.workSession) {
+      text = '$(flame)';
+    } else {
+      text = '$(triangle-right)';
+    }
 
     text += ' ';
     if (!this.currentTime) {
@@ -179,17 +188,19 @@ export class TimeTracker {
 
   protected setStatusBarTooltip = (): string => {
     let text: string = '';
-    if (this.paused)
+    if (this.paused) {
       text = `You worked for ${this.formatTime(this.currentTime, true)}!`;
-    else if (!this.paused)
+    } else if (!this.paused) {
       text = `You are working for ${this.formatTime(this.currentTime, true)}!`;
+    }
     return text;
   };
 
   protected setStatusBarColor = () => {
     let color;
-    if (this.paused || this.inBreak)
+    if (this.paused || this.inBreak) {
       color = new vscode.ThemeColor('descriptionForeground');
+    }
 
     this._statusBarItem.color = color;
   };

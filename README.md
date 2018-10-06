@@ -4,6 +4,25 @@ This extension allows you to easily track time.
 
 ![Demo](assets/demo.gif)
 
+## Installation
+
+Refer to Visual Studio Marketplace to install or download the extension
+
+To install via command line, you should have installed `code` command in PATH
+
+```
+code --install-extension alexcambose.time-tracker
+```
+
+## Commands
+
+- `Start work session`: start a work sesstion
+- `Stop work session`: stop a work sesstion
+- `Toggle Pause`: Start/Stop pause
+- `Toggle Break`: Start/Stop break
+
+- Click on the status bar item
+
 ## Features
 
 - Start/Stop time tracking

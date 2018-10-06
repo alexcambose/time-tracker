@@ -53,10 +53,12 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
+    "lint": "tslint -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "npm run lint"
   },
+  "icon": "assets/icon.png",
   "devDependencies": {
     "typescript": "^2.6.1",
     "vscode": "^1.1.21",
