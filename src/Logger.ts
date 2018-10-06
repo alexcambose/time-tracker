@@ -11,17 +11,17 @@ export default class Logger {
   private globalState: vscode.Memento;
   constructor(context: vscode.ExtensionContext) {
     this.globalState = context.globalState;
-    console.log('state', this.globalState);
+    console.log('state', this.getCurrentDay());
   }
   public saveWorkTimes(): void {
-    this.saveData(this.workTimes);
+    this.saveWorkData(this.workTimes);
     console.log(this.getDataFromDay(this.getCurrentDay()));
   }
-  protected saveData(data: ITimeBlock[]): void {
+  protected saveWorkData(data: ITimeBlock[]): void {
     const oldData = this.globalState.get('times');
     this.globalState.update('times', {
       ...oldData,
-      [this.getCurrentDay()]: data,
+      [this.getCurrentDay()]: [...this.getDataFromToday(), ...data],
     });
   }
   public getDataFromToday(type?: TimeType): ITimeBlock[] {
@@ -54,6 +54,7 @@ export default class Logger {
     return this.globalState.get('workSession') || 0;
   }
   public set workSession(value: number) {
+    this.saveWorkTimes();
     this.globalState.update('workSession', value);
   }
   public get workTimesToday(): object[] {

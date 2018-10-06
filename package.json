@@ -1,9 +1,9 @@
 {
-  "name": "take-a-break",
-  "displayName": "take-a-break",
-  "description": "Take a break",
+  "name": "time-tracker",
+  "displayName": "Time tracker",
+  "description": "Track your working time",
   "version": "0.0.1",
-  "publisher": "cineva",
+  "publisher": "Alexandru Cambose",
   "engines": {
     "vscode": "^1.27.0"
   },
@@ -16,10 +16,6 @@
   "main": "./out/extension",
   "contributes": {
     "commands": [
-      {
-        "command": "extension.sayHello",
-        "title": "Hello World"
-      },
       {
         "command": "extension.togglePause",
         "title": "Toggle Pause"

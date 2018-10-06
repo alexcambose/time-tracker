@@ -4,16 +4,7 @@
 import * as vscode from 'vscode';
 import { TimeType } from './enums';
 import { TIME_FORMAT_LONG, TIME_FORMAT_SHORT } from './constants';
-import {
-  window,
-  workspace,
-  commands,
-  Disposable,
-  ExtensionContext,
-  StatusBarAlignment,
-  StatusBarItem,
-  TextDocument,
-} from 'vscode';
+import { window, StatusBarAlignment, StatusBarItem } from 'vscode';
 import * as moment from 'moment';
 import 'moment-duration-format';
 import Logger from './Logger';
@@ -23,31 +14,25 @@ import Logger from './Logger';
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "take-a-break" is now active!');
-  const tab = new TakeABreak(context);
+  const tab = new TimeTracker(context);
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
-  let disposable = vscode.commands.registerCommand(
-    'extension.sayHello',
-    () => {}
-  );
   context.subscriptions.push(tab);
-  context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated
 export function deactivate() {}
 
-export class TakeABreak {
+export class TimeTracker {
   private _statusBarItem: StatusBarItem;
   protected currentTime: number;
   protected logger: Logger;
   protected inBreak: boolean = false;
   protected paused: boolean = false;
   protected context: vscode.ExtensionContext;
-  protected invervalId: number;
+  protected invervalId: NodeJS.Timer;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
@@ -137,10 +122,8 @@ export class TakeABreak {
   };
 
   public formatTime = (seconds: number, long: boolean = false): string => {
-    /* tslint:disable-next-line */
-    return moment
-      .duration(seconds, 'seconds')
-      .format(long ? TIME_FORMAT_LONG : TIME_FORMAT_SHORT);
+    const duration = <any>moment.duration(seconds, 'seconds');
+    return duration.format(long ? TIME_FORMAT_LONG : TIME_FORMAT_SHORT);
   };
   public startWorkSession = () => {
     if (this.logger.workSession) {
@@ -150,6 +133,7 @@ export class TakeABreak {
       return;
     }
     vscode.window.showInformationMessage('Work session started!');
+    this.currentTime = 1;
     this.createInterval();
     this.recomputeStatusBar();
   };
@@ -206,6 +190,7 @@ export class TakeABreak {
     this._statusBarItem.color = color;
   };
   public dispose = () => {
+    this.stopWorkSession();
     this._statusBarItem.dispose();
   };
 }

@@ -1,6 +1,6 @@
-# take-a-break README
+# time-tracker README
 
-This is the README for your extension "take-a-break". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "time-tracker". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
