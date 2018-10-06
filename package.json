@@ -3,7 +3,7 @@
   "displayName": "Time tracker",
   "description": "Track your working time",
   "version": "0.0.1",
-  "publisher": "Alexandru Cambose",
+  "publisher": "alexcambose",
   "engines": {
     "vscode": "^1.27.0"
   },
@@ -32,7 +32,23 @@
         "command": "extension.stopWorkSession",
         "title": "Stop work session"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Time Tracker configuration",
+      "properties": {
+        "time-tracker.shortTimeFormat": {
+          "type": "string",
+          "default": "h [hours and] m [minutes]",
+          "description": "Short time format to display when working"
+        },
+        "time-tracker.longTimeFormat": {
+          "type": "string",
+          "default": "h[h] mm[m]",
+          "description": "Long time format to display in notifications or when paused"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

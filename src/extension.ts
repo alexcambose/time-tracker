@@ -55,11 +55,13 @@ export class TimeTracker {
     this.recomputeStatusBar();
   }
   public createInterval = () => {
+    this.logger.add(TimeType.Work);
+    this.logger.workSession = 1; // set to 1 for instant change
+
     this.invervalId = setInterval(() => {
       this.setStatusBarText();
       this.currentTime++;
       this.logger.workSession = this.currentTime;
-      console.log(this.logger.workTimesToday);
     }, 1000);
   };
   public clearInterval() {
@@ -91,7 +93,6 @@ export class TimeTracker {
       vscode.window.showInformationMessage('Paused!');
     } else {
       this.createInterval();
-      this.logger.add(TimeType.Work);
       vscode.window.showInformationMessage(
         this.paused ? 'Paused!' : 'Resumed!'
       );
@@ -108,16 +109,15 @@ export class TimeTracker {
       this.clearInterval();
 
       this.logger.add(TimeType.Break);
+    } else if (this.paused) {
+      this.logger.add(TimeType.Pause);
+      vscode.window.showInformationMessage('You are now only paused!');
     } else {
-      if (this.paused) {
-        this.logger.add(TimeType.Pause);
-        vscode.window.showInformationMessage('You are now only paused!');
-      } else {
-        this.logger.add(TimeType.Work);
-        vscode.window.showInformationMessage('You are now working!');
-      }
+      this.logger.add(TimeType.Work);
+      vscode.window.showInformationMessage('You are now working!');
       this.createInterval();
     }
+
     this.recomputeStatusBar();
   };
 
@@ -133,6 +133,7 @@ export class TimeTracker {
       return;
     }
     vscode.window.showInformationMessage('Work session started!');
+    this.logger.add(TimeType.WorkSession);
     this.currentTime = 1;
     this.createInterval();
     this.recomputeStatusBar();
@@ -152,15 +153,19 @@ export class TimeTracker {
     this.logger.workSession = 0;
     this.currentTime = this.logger.workSession;
     vscode.window.showInformationMessage('Work session stopped!');
+    this.paused = false;
+    this.inBreak = false;
     this.clearInterval();
     this.recomputeStatusBar();
   };
+
   protected setStatusBarText = (): void => {
     let text: string = '';
     if (this.paused) text = '$(x)';
-    else if (!this.paused) text = '$(triangle-right)';
-    if (this.inBreak) text = '$(clock)';
-    if (!this.logger.workSession) text = '$(flame)';
+    else if (this.inBreak) text = '$(clock)';
+    else if (!this.logger.workSession) text = '$(flame)';
+    else text = '$(triangle-right)';
+
     text += ' ';
     if (!this.currentTime) {
       text += 'Start work session!';
@@ -178,7 +183,6 @@ export class TimeTracker {
       text = `You worked for ${this.formatTime(this.currentTime, true)}!`;
     else if (!this.paused)
       text = `You are working for ${this.formatTime(this.currentTime, true)}!`;
-    console.log(text, this.paused);
     return text;
   };
 
