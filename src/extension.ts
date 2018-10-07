@@ -66,6 +66,7 @@ export class TimeTracker {
       this.logger.workSession = this.currentTime;
     }, 1000);
   };
+
   public clearInterval() {
     clearInterval(this.invervalId);
   }
