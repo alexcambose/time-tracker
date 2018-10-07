@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import hourlyPay from '../hourlyPay';
+import hourlyPay from '../hourlyRate';
 
 const oneHourInMs = 60 * 60 * 1000;
 // Defines a Mocha unit test

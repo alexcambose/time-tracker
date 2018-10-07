@@ -1,4 +1,4 @@
-import { HOURLY_PAY_REGEX } from './constants';
+import { HOURLY_RATE_REGEX } from './constants';
 
 const hoursBetweenTimestamps = (
   timestamp1: number,
@@ -11,9 +11,9 @@ const hoursBetweenTimestamps = (
 export default (
   startedTimestamp: number,
   endTimestamp: number = Date.now(),
-  hourlyPay: string
+  hourlyRate: string
 ): string | boolean => {
-  const parsed = HOURLY_PAY_REGEX.exec(hourlyPay);
+  const parsed = HOURLY_RATE_REGEX.exec(hourlyRate);
   if (parsed.length < 3) return false;
   const amount: number = parseInt(parsed[1]);
   const currency: string = parsed[2];

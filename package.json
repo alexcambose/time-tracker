@@ -54,6 +54,16 @@
           "type": "string",
           "default": "h[h] mm[m]",
           "description": "Long time format to display in notifications or when paused"
+        },
+        "time-tracker.hourlyRate": {
+          "type": "string",
+          "default": "",
+          "description": "The amount of money earned for every hour worked. (formatting `<number> <currency>`, ex: `10 USD`, `16 EUR`)"
+        },
+        "time-tracker.breakInterval": {
+          "type": "number",
+          "default": "0",
+          "description": "The time interval, in minutes, at which the extension should remind you to take break. Set it to 0 to disable."
         }
       }
     }
@@ -75,7 +85,10 @@
     "@types/mocha": "^2.2.42"
   },
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
     "moment": "^2.22.2",
-    "moment-duration-format": "^2.2.2"
+    "moment-duration-format": "^2.2.2",
+    "mustache": "^3.0.0"
   }
 }

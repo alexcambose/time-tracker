@@ -27,7 +27,6 @@ export function deactivate() {}
 
 export class TimeTracker {
   private _statusBarItem: StatusBarItem;
-  protected currentTime: number;
   protected logger: Logger;
   protected inBreak: boolean = false;
   protected paused: boolean = false;
@@ -37,8 +36,7 @@ export class TimeTracker {
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.logger = new Logger(this.context);
-    this.currentTime = this.logger.workSession;
-    if (this.currentTime) {
+    if (this.logger.workSession) {
       this.createInterval();
     }
     this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
@@ -62,8 +60,7 @@ export class TimeTracker {
 
     this.invervalId = setInterval(() => {
       this.setStatusBarText();
-      this.currentTime++;
-      this.logger.workSession = this.currentTime;
+      this.logger.workSession++;
     }, 1000);
   };
 
@@ -72,7 +69,7 @@ export class TimeTracker {
   }
   public togglePause = (): void => {
     // start work session if not started
-    if (!this.currentTime) {
+    if (!this.logger.workSession) {
       this.startWorkSession();
       return;
     }
@@ -108,9 +105,7 @@ export class TimeTracker {
   public toggleBreak = (): void => {
     this.inBreak = !this.inBreak;
     if (this.inBreak) {
-      vscode.window.showInformationMessage(
-        `You are now taking a break! You have worked ${0} since the last break.`
-      );
+      vscode.window.showInformationMessage(`You are now taking a break!`);
       this.clearInterval();
 
       this.logger.add(TimeType.Break);
@@ -139,7 +134,6 @@ export class TimeTracker {
     }
     vscode.window.showInformationMessage('Work session started!');
     this.logger.add(TimeType.WorkSession);
-    this.currentTime = 1;
     this.createInterval();
     this.recomputeStatusBar();
   };
@@ -156,8 +150,11 @@ export class TimeTracker {
       return;
     }
     this.logger.workSession = 0;
-    this.currentTime = this.logger.workSession;
-    vscode.window.showInformationMessage('Work session stopped!');
+    vscode.window.showInformationMessage(
+      `Work session stopped! You have worked ${this.formatTime(
+        this.logger.workSession
+      )}`
+    );
     this.paused = false;
     this.inBreak = false;
     this.clearInterval();
@@ -177,12 +174,12 @@ export class TimeTracker {
     }
 
     text += ' ';
-    if (!this.currentTime) {
+    if (!this.logger.workSession) {
       text += 'Start work session!';
     } else if (this.inBreak) {
       text += 'Taking a break';
     } else {
-      text += this.formatTime(this.currentTime, this.paused);
+      text += this.formatTime(this.logger.workSession, this.paused);
     }
     this._statusBarItem.text = text;
   };
@@ -190,11 +187,17 @@ export class TimeTracker {
   protected setStatusBarTooltip = (): string => {
     let text: string = '';
     if (this.paused) {
-      text = `You worked for ${this.formatTime(this.currentTime, true)}!`;
+      text = `You worked for ${this.formatTime(
+        this.logger.workSession,
+        true
+      )}!`;
     } else if (!this.paused) {
-      text = `You are working for ${this.formatTime(this.currentTime, true)}!`;
+      text = `You are working for ${this.formatTime(
+        this.logger.workSession,
+        true
+      )}!`;
     }
-    return text;
+    this._statusBarItem.tooltip = text;
   };
 
   protected setStatusBarColor = () => {
