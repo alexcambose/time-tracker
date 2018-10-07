@@ -2,5 +2,6 @@ export enum TimeType {
   Break = 'b',
   Pause = 'p',
   Work = 'w',
-  WorkSession = 'ws',
+  WorkSessionStart = 'ws_start',
+  WorkSessionStop = 'ws_stop',
 }

@@ -64,6 +64,11 @@
           "type": "number",
           "default": "0",
           "description": "The time interval, in minutes, at which the extension should remind you to take break. Set it to 0 to disable."
+        },
+        "time-tracker.saveWorkSessionBetweenStartups": {
+          "type": "boolean",
+          "default": false,
+          "description": "Save work session between startups. If unchecked, the current work session will be ended when the editor closes."
         }
       }
     }

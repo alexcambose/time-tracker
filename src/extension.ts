@@ -8,17 +8,10 @@ import { window, StatusBarAlignment, StatusBarItem } from 'vscode';
 import * as moment from 'moment';
 import 'moment-duration-format';
 import Logger from './Logger';
+import BreakChecker from './BreakChecker';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
   const tab = new TimeTracker(context);
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
-
   context.subscriptions.push(tab);
 }
 
@@ -28,6 +21,7 @@ export function deactivate() {}
 export class TimeTracker {
   private _statusBarItem: StatusBarItem;
   protected logger: Logger;
+  protected breakChecker: BreakChecker;
   protected inBreak: boolean = false;
   protected paused: boolean = false;
   protected context: vscode.ExtensionContext;
@@ -35,7 +29,12 @@ export class TimeTracker {
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
+
     this.logger = new Logger(this.context);
+    this.breakChecker = new BreakChecker(
+      this.displayShouldTakeABreakMessage,
+      this.logger
+    );
     if (this.logger.workSession) {
       this.createInterval();
     }
@@ -59,6 +58,7 @@ export class TimeTracker {
     this.logger.workSession = 1; // set to 1 for instant change
 
     this.invervalId = setInterval(() => {
+      this.breakChecker.check();
       this.setStatusBarText();
       this.logger.workSession++;
     }, 1000);
@@ -125,15 +125,17 @@ export class TimeTracker {
     const duration = <any>moment.duration(seconds, 'seconds');
     return duration.format(long ? TIME_FORMAT_LONG : TIME_FORMAT_SHORT);
   };
-  public startWorkSession = () => {
+  public startWorkSession = (displayMessage = true) => {
     if (this.logger.workSession) {
       vscode.window.showWarningMessage(
         `You can't start a session because it is already started`
       );
       return;
     }
-    vscode.window.showInformationMessage('Work session started!');
-    this.logger.add(TimeType.WorkSession);
+    if (displayMessage) {
+      vscode.window.showInformationMessage('Work session started!');
+    }
+    this.logger.add(TimeType.WorkSessionStart);
     this.createInterval();
     this.recomputeStatusBar();
   };
@@ -155,6 +157,8 @@ export class TimeTracker {
         this.logger.workSession
       )}`
     );
+    this.logger.add(TimeType.WorkSessionStop);
+
     this.paused = false;
     this.inBreak = false;
     this.clearInterval();
@@ -184,7 +188,7 @@ export class TimeTracker {
     this._statusBarItem.text = text;
   };
 
-  protected setStatusBarTooltip = (): string => {
+  protected setStatusBarTooltip = (): void => {
     let text: string = '';
     if (this.paused) {
       text = `You worked for ${this.formatTime(
@@ -207,6 +211,21 @@ export class TimeTracker {
     }
 
     this._statusBarItem.color = color;
+  };
+  protected displayShouldTakeABreakMessage = () => {
+    vscode.window
+      .showWarningMessage(
+        `You are working for ${this.formatTime(
+          this.logger.workSession,
+          true
+        )}. You should take a break!`,
+        'Take a break'
+      )
+      .then(e => {
+        if (e === 'Take a break') {
+          this.toggleBreak();
+        }
+      });
   };
   public dispose = () => {
     this.stopWorkSession();

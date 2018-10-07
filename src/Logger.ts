@@ -1,8 +1,11 @@
 import { TimeType } from './enums';
 import * as vscode from 'vscode';
 import * as moment from 'moment';
-import { STORAGE_DATE_FORMAT_ID } from './constants';
-import { ITimeBlock, ITimeDay } from './interfaces';
+import {
+  STORAGE_DATE_FORMAT_ID,
+  SAVE_WORK_SESSIONS_BETWEEN_STARTUPS,
+} from './constants';
+import { ITimeBlock } from './interfaces';
 /*
 Class that works only with data and time, provides a bridge for saving and retreiving data
 */
@@ -11,6 +14,10 @@ export default class Logger {
   private globalState: vscode.Memento;
   constructor(context: vscode.ExtensionContext) {
     this.globalState = context.globalState;
+    // if false, create a new work session each time is initialized
+    if (!SAVE_WORK_SESSIONS_BETWEEN_STARTUPS) {
+      this.workSession = 0;
+    }
   }
   public saveWorkTimes(): void {
     this.saveWorkData(this.workTimes);
@@ -30,9 +37,37 @@ export default class Logger {
     }
     return data;
   }
-  public getDataFromDay(time: string): [ITimeBlock] | undefined {
-    const allData: ITimeDay = this.globalState.get('times');
+  public getDataFromDay(time: string): ITimeBlock[] | undefined {
+    const allData = this.globalState.get('times');
     return allData[time] || [];
+  }
+
+  /**
+   * Get last time blocks
+   * @param  {[TimeType]|TimeType} timeType -
+   */
+  public lastWorkTypes(timeType?: TimeType[] | TimeType) {
+    const allData = this.globalState.get('times');
+    if (!timeType) {
+      return allData;
+    }
+    // get all time keys and reverse the array wso we can access it with index 0 the newest
+    let dates = Object.keys(allData).reverse();
+    // store all filtered time block in an array
+    let lastTimeBlocks = [];
+    // while we haven't found any time blocks and we still have date objects remaining to search for
+    while (!lastTimeBlocks.length && dates.length) {
+      // get current day array object [{}, {}, {}] and filter by the work type
+      lastTimeBlocks = allData[dates[0]].filter(
+        ({ type }) =>
+          Array.isArray(timeType) // if searched types are an array
+            ? timeType.indexOf(type) !== -1
+            : type === timeType // if it's a string
+      );
+      //remove first element from the reversed array
+      dates.shift();
+    }
+    return lastTimeBlocks;
   }
   protected getCurrentDay(): string {
     return moment().format(STORAGE_DATE_FORMAT_ID);
