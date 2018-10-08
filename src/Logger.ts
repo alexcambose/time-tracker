@@ -46,40 +46,44 @@ export default class Logger {
    * Get last time blocks
    * @param  {[TimeType]|TimeType} timeType -
    */
-  public lastWorkTypes(timeType?: TimeType[] | TimeType) {
+  public lastWorkTypes(timeType?: TimeType[] | TimeType): ITimeBlock[] {
     const allData = this.globalState.get('times');
-    if (!timeType) {
-      return allData;
-    }
     // get all time keys and reverse the array wso we can access it with index 0 the newest
     let dates = Object.keys(allData).reverse();
     // store all filtered time block in an array
     let lastTimeBlocks = [];
     // while we haven't found any time blocks and we still have date objects remaining to search for
     while (!lastTimeBlocks.length && dates.length) {
-      // get current day array object [{}, {}, {}] and filter by the work type
-      lastTimeBlocks = allData[dates[0]].filter(
-        ({ type }) =>
-          Array.isArray(timeType) // if searched types are an array
-            ? timeType.indexOf(type) !== -1
-            : type === timeType // if it's a string
-      );
+      lastTimeBlocks = allData[dates[0]];
+      // get current day array object [{}, {}, {}] and
+      if (timeType) {
+        // filter by the work type(s) if it is specified
+        lastTimeBlocks = lastTimeBlocks.filter(
+          ({ type }) =>
+            Array.isArray(timeType) // if searched types are an array
+              ? timeType.indexOf(type) !== -1
+              : type === timeType // if it's a string
+        );
+      }
+
       //remove first element from the reversed array
       dates.shift();
     }
     return lastTimeBlocks;
   }
+  public setHourlyRate = value => this.globalState.update('hrate', value);
+  public getHourlyRate = (): string => this.globalState.get('hrate');
+
   protected getCurrentDay(): string {
     return moment().format(STORAGE_DATE_FORMAT_ID);
   }
-  // private localStorageData =
   /**
    * adds a log
    */
   public add(type: TimeType) {
     const block: ITimeBlock = {
       type,
-      startTime: new Date().getTime(),
+      startTime: Date.now(),
     };
 
     this.workTimes.push(block);

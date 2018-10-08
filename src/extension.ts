@@ -3,12 +3,19 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { TimeType } from './enums';
-import { TIME_FORMAT_LONG, TIME_FORMAT_SHORT } from './constants';
+import {
+  TIME_FORMAT_LONG,
+  TIME_FORMAT_SHORT,
+  SAVE_WORK_SESSIONS_BETWEEN_STARTUPS,
+  HOURLY_RATE,
+  SALARY_RELATED_WORK_TYPES,
+} from './constants';
 import { window, StatusBarAlignment, StatusBarItem } from 'vscode';
 import * as moment from 'moment';
 import 'moment-duration-format';
 import Logger from './Logger';
 import BreakChecker from './BreakChecker';
+import hourlyRate, { parseHourlyRate } from './hourlyRate';
 
 export function activate(context: vscode.ExtensionContext) {
   const tab = new TimeTracker(context);
@@ -26,7 +33,7 @@ export class TimeTracker {
   protected paused: boolean = false;
   protected context: vscode.ExtensionContext;
   protected invervalId: NodeJS.Timer;
-
+  protected breakMessageShown: boolean = false;
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
 
@@ -35,12 +42,16 @@ export class TimeTracker {
       this.displayShouldTakeABreakMessage,
       this.logger
     );
-    if (this.logger.workSession) {
+    if (SAVE_WORK_SESSIONS_BETWEEN_STARTUPS) {
       this.createInterval();
     }
     this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
     this._statusBarItem.command = 'extension.togglePause';
     this._statusBarItem.show();
+    vscode.commands.registerCommand(
+      'extension.calculateSalary',
+      this.calculateSalary
+    );
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
     vscode.commands.registerCommand(
@@ -54,9 +65,6 @@ export class TimeTracker {
     this.recomputeStatusBar();
   }
   public createInterval = () => {
-    this.logger.add(TimeType.Work);
-    this.logger.workSession = 1; // set to 1 for instant change
-
     this.invervalId = setInterval(() => {
       this.breakChecker.check();
       this.setStatusBarText();
@@ -109,6 +117,7 @@ export class TimeTracker {
       this.clearInterval();
 
       this.logger.add(TimeType.Break);
+      this.breakMessageShown = false;
     } else if (this.paused) {
       this.logger.add(TimeType.Pause);
       vscode.window.showInformationMessage('You are now only paused!');
@@ -136,6 +145,7 @@ export class TimeTracker {
       vscode.window.showInformationMessage('Work session started!');
     }
     this.logger.add(TimeType.WorkSessionStart);
+    this.logger.workSession = 1;
     this.createInterval();
     this.recomputeStatusBar();
   };
@@ -177,7 +187,7 @@ export class TimeTracker {
       text = '$(triangle-right)';
     }
 
-    text += ' ';
+    text += '  ';
     if (!this.logger.workSession) {
       text += 'Start work session!';
     } else if (this.inBreak) {
@@ -208,11 +218,15 @@ export class TimeTracker {
     let color;
     if (this.paused || this.inBreak) {
       color = new vscode.ThemeColor('descriptionForeground');
+    } else if (this.breakMessageShown) {
+      color = new vscode.ThemeColor('errorForeground');
     }
-
     this._statusBarItem.color = color;
   };
   protected displayShouldTakeABreakMessage = () => {
+    if (this.breakMessageShown) {
+      return;
+    }
     vscode.window
       .showWarningMessage(
         `You are working for ${this.formatTime(
@@ -226,6 +240,43 @@ export class TimeTracker {
           this.toggleBreak();
         }
       });
+    this.breakMessageShown = true;
+    this.recomputeStatusBar();
+  };
+  calculateSalary = () => {
+    if (!HOURLY_RATE) {
+      vscode.window
+        .showInputBox({
+          prompt: 'Enter your hourly rate:',
+          placeHolder: '<number> <currency>',
+          validateInput: value => {
+            if (!parseHourlyRate(value)) {
+              return 'Invalid value!';
+            }
+          },
+          value: this.logger.getHourlyRate(),
+        })
+        .then(value => {
+          // save for later and easier usage
+          this.logger.setHourlyRate(value);
+          this.displaySalary(value);
+        });
+    } else {
+      this.displaySalary();
+    }
+  };
+  displaySalary = (value = '') => {
+    const hrate = value || HOURLY_RATE || this.logger.getHourlyRate();
+    let last = this.logger.lastWorkTypes(SALARY_RELATED_WORK_TYPES);
+    const start = last[last.length - 1].startTime;
+    const end = start + this.logger.workSession * 1000;
+    const salary = hourlyRate(start, end, hrate);
+    if (!salary) {
+      vscode.window.showInformationMessage(
+        `Invalid salary formatting! Check the config!`
+      );
+    }
+    vscode.window.showInformationMessage(salary);
   };
   public dispose = () => {
     this.stopWorkSession();

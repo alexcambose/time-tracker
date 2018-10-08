@@ -39,11 +39,15 @@
       {
         "command": "extension.stopWorkSession",
         "title": "Stop work session"
+      },
+      {
+        "command": "extension.calculateSalary",
+        "title": "Calculate salary"
       }
     ],
     "configuration": {
       "type": "object",
-      "title": "Time Tracker configuration",
+      "title": "Time Tracker",
       "properties": {
         "time-tracker.shortTimeFormat": {
           "type": "string",
@@ -63,7 +67,7 @@
         "time-tracker.breakInterval": {
           "type": "number",
           "default": "0",
-          "description": "The time interval, in minutes, at which the extension should remind you to take break. Set it to 0 to disable."
+          "description": "The time interval, in minutes, at which the extension will remind you to take break. Set it to 0 to disable."
         },
         "time-tracker.saveWorkSessionBetweenStartups": {
           "type": "boolean",

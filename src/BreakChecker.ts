@@ -1,4 +1,7 @@
-import { SHOULD_TAKE_BREAK_INTERVAL } from './constants';
+import {
+  SHOULD_TAKE_BREAK_INTERVAL,
+  BREAK_RELATED_WORK_TYPES,
+} from './constants';
 import Logger from './Logger';
 import { TimeType } from './enums';
 
@@ -10,10 +13,17 @@ export default class BreakChecker {
     this.logger = logger;
   }
   public check() {
-    const minutes = 100;
-    console.log(this.logger.lastWorkTypes());
-    if (minutes > SHOULD_TAKE_BREAK_INTERVAL) {
-      // this.breakMessage();
+    if (!SHOULD_TAKE_BREAK_INTERVAL) {
+      return;
+    }
+    // this.logger.workSession is in seconds
+    const breakRelatedTimeBlocks = this.logger.lastWorkTypes(
+      BREAK_RELATED_WORK_TYPES
+    );
+    const lastBreakTime =
+      breakRelatedTimeBlocks[breakRelatedTimeBlocks.length - 1].startTime;
+    if ((Date.now() - lastBreakTime) / 60000 > SHOULD_TAKE_BREAK_INTERVAL) {
+      this.breakMessage();
     }
   }
   protected breakMessage() {
