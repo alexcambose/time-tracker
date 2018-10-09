@@ -3,7 +3,6 @@ import {
   BREAK_RELATED_WORK_TYPES,
 } from './constants';
 import Logger from './Logger';
-import { TimeType } from './enums';
 
 export default class BreakChecker {
   protected onBreak: Function;

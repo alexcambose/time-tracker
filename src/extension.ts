@@ -16,6 +16,7 @@ import 'moment-duration-format';
 import Logger from './Logger';
 import BreakChecker from './BreakChecker';
 import hourlyRate, { parseHourlyRate } from './hourlyRate';
+import HttpServer from './web/HttpServer';
 
 export function activate(context: vscode.ExtensionContext) {
   const tab = new TimeTracker(context);
@@ -54,6 +55,15 @@ export class TimeTracker {
     );
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
+    vscode.commands.registerCommand(
+      'extension.startWorkLogViewer',
+      HttpServer.create
+    );
+    HttpServer.create();
+    vscode.commands.registerCommand(
+      'extension.stopWorkLogViewer',
+      HttpServer.stop
+    );
     vscode.commands.registerCommand(
       'extension.stopWorkSession',
       this.stopWorkSession
