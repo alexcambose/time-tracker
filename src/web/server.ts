@@ -1,14 +1,31 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
-var path = require('path');
+const path = require('path');
+var pjson = require('../../package.json');
+
 const app = express();
-app.use(express.static(path.join(__dirname + './public')));
+app.set('views', path.resolve(__dirname, '../../web'));
 
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
-app.set('view engine', 'handlebars');
+var hbs = exphbs.create({
+  defaultLayout: 'main',
+  extname: '.hbs',
+  layoutsDir: path.resolve(__dirname, '../../web/layouts'),
+  helpers: {
+    foo: function() {
+      return 'FOO!';
+    },
+    bar: function() {
+      return 'BAR!';
+    },
+  },
+});
 
+app.engine('.hbs', hbs.engine);
+app.set('view engine', '.hbs');
 app.get('/', (req, res) => {
-  res.render('home');
+  res.render('home', {
+    version: pjson.version,
+  });
 });
 
 export default app;
