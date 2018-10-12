@@ -3,19 +3,45 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Example App</title>
+  <title>Time Tracker</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
   <style>
+    :root {
+      --footerHeight: 100px;
+    }
+
+    footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: var(--footerHeight);
+      display: flex;
+      align-items: center;
+      padding: 0 !important;
+      justify-content: center;
+    }
+
     .container {
       margin-top: 20px;
+      padding-bottom: var(--footerHeight);
     }
   </style>
 </head>
 
 <body>
-
-  {{{body}}}
-
+  <div class="container">
+    <h1 class="title">Time Tracker <span class="is-size-7 has-text-weight-light">{{version}}</span></h1>
+    <hr>
+    {{{body}}}
+  </div>
+  <footer class="footer">
+    <p>
+      <strong>Time tracker</strong> by <a href="https://alexcambose.ro">Alexandru Cambose</a>. The source code is
+      licensed
+      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
+    </p>
+  </footer>
 </body>
 
 </html>

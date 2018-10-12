@@ -23,7 +23,7 @@ export default class Logger {
     this.saveWorkData(this.workTimes);
   }
   protected saveWorkData(data: ITimeBlock[]): void {
-    const oldData = this.globalState.get('times');
+    const oldData = this.allData();
     this.workTimes = [];
     this.globalState.update('times', {
       ...oldData,
@@ -38,16 +38,16 @@ export default class Logger {
     return data;
   }
   public getDataFromDay(time: string): ITimeBlock[] | undefined {
-    const allData = this.globalState.get('times');
+    const allData = this.allData();
     return allData[time] || [];
   }
-
+  public allData = () => this.globalState.get('times');
   /**
    * Get last time blocks
    * @param  {[TimeType]|TimeType} timeType -
    */
   public lastWorkTypes(timeType?: TimeType[] | TimeType): ITimeBlock[] {
-    const allData = this.globalState.get('times');
+    const allData = this.allData();
     // get all time keys and reverse the array wso we can access it with index 0 the newest
     let dates = Object.keys(allData).reverse();
     // store all filtered time block in an array

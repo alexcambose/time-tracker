@@ -59,7 +59,7 @@ export class TimeTracker {
       'extension.startWorkLogViewer',
       HttpServer.create
     );
-    HttpServer.create();
+    HttpServer.create(context);
     vscode.commands.registerCommand(
       'extension.stopWorkLogViewer',
       HttpServer.stop
