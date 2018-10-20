@@ -1,6 +1,7 @@
 # Time Tracker
+[![Build Status](https://travis-ci.org/alexcambose/time-tracker.svg?branch=master)](https://travis-ci.org/alexcambose/time-tracker) [![made-for-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
 
-[![Build Status](https://travis-ci.org/alexcambose/time-tracker.svg?branch=master)](https://travis-ci.org/alexcambose/time-tracker)
+
 
 This extension allows you to easily track time, break reminders and more.
 
