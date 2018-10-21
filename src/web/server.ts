@@ -1,17 +1,15 @@
 const express = require('express');
-const exphbs = require('express-handlebars');
 const path = require('path');
-
+import * as enums from '../enums';
 const app = express();
 app.set('views', path.resolve(__dirname, '../../web'));
 
-var hbs = exphbs.create({
-  defaultLayout: 'main',
-  extname: '.hbs',
-  layoutsDir: path.resolve(__dirname, '../../web/layouts'),
+app.set('view engine', 'ejs');
+
+app.use(function(req, res, next) {
+  res.locals = {
+    enums,
+  };
+  next();
 });
-
-app.engine('.hbs', hbs.engine);
-app.set('view engine', '.hbs');
-
 export default app;

@@ -1,0 +1,44 @@
+<% include ./partials/header %>
+<div class="columns">
+  <% include ./components/sidebar %>
+  <div class="column is-9">
+    <div class="columns">
+      <div class="column is-4">
+        <div class="box">box 1</div>
+      </div>
+      <div class="column is-4">
+        <div class="box">box 2</div>
+      </div>
+      <div class="column is-4">
+        <div class="box">box 3</div>
+      </div>
+    </div>
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Time</th>
+          <th>Length</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(locals.currentDay) {currentDay.forEach(function (data){%>
+        <tr>
+
+          <td>
+            include('components/timeTypeTag', {type: data.type});
+          </td>
+          <td>{{ this.length }}</td>
+
+
+        </tr>
+        <% });  }else {%>
+        <tr>
+          <% include ./components/nodata %>
+        </tr>
+        <% }%>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% include ./partials/footer %>

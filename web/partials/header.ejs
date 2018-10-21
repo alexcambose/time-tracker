@@ -10,6 +10,10 @@
       --footerHeight: 100px;
     }
 
+    .tag {
+      width: 100px;
+    }
+
     footer {
       position: fixed;
       left: 0;
@@ -31,17 +35,7 @@
 
 <body>
   <div class="container">
-    <h1 class="title">Time Tracker <span class="is-size-7 has-text-weight-light">{{version}}</span></h1>
+    <h1 class="title">Time Tracker <span class="is-size-7 has-text-weight-light">
+        <%=version%>
+      </span></h1>
     <hr>
-    {{{body}}}
-  </div>
-  <footer class="footer">
-    <p>
-      <strong>Time tracker</strong> by <a href="https://alexcambose.ro">Alexandru Cambose</a>. The source code is
-      licensed
-      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
-    </p>
-  </footer>
-</body>
-
-</html>

@@ -37,7 +37,7 @@ export class TimeTracker {
   protected breakMessageShown: boolean = false;
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-
+    console.log(context);
     this.logger = new Logger(this.context);
     this.breakChecker = new BreakChecker(
       this.displayShouldTakeABreakMessage,
@@ -53,6 +53,7 @@ export class TimeTracker {
       'extension.calculateSalary',
       this.calculateSalary
     );
+    vscode.commands.registerCommand('extension.resetData', this.resetData);
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
     vscode.commands.registerCommand(
@@ -291,5 +292,10 @@ export class TimeTracker {
   public dispose = () => {
     this.stopWorkSession();
     this._statusBarItem.dispose();
+  };
+  public resetData = () => {
+    this.stopWorkSession();
+    this.logger.resetAll();
+    vscode.window.showInformationMessage('Data erased!');
   };
 }

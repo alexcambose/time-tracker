@@ -89,6 +89,12 @@ export default class Logger {
     this.workTimes.push(block);
     this.saveWorkTimes();
   }
+  // erases all data
+  public resetAll(): void {
+    console.log(this);
+    this.workSession = null;
+    this.globalState.update('times', {});
+  }
   public get workSession(): number {
     return this.globalState.get('workSession') || 0;
   }
