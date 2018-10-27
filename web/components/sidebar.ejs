@@ -5,7 +5,7 @@
     </p>
     <ul class="menu-list">
       <% if(days.length){ days.forEach(function(day){ %>
-      <li><a class="<%=day.active && 'is-active'%>" href="<%=day.url%>">
+      <li><a class="<%=day.active && 'is-active'%>" href="/<%=day.url%>">
           <%=day.label%>
       </li></a>
       <% }) } else {  %>

@@ -1,5 +1,6 @@
 import app from './server';
 import * as moment from 'moment';
+import 'moment-duration-format';
 import {
   SERVER_PORT,
   STORAGE_DATE_FORMAT_ID,
@@ -10,6 +11,7 @@ import { window, ExtensionContext } from 'vscode';
 import Logger from '../Logger';
 import { TimeType } from '../enums';
 var pjson = require('../../package.json');
+import 'advmap';
 
 // TODO: Should be singleton
 export default new class HttpServer {
@@ -21,26 +23,35 @@ export default new class HttpServer {
       version: pjson.version,
       days: Object.keys(logger.allData() || {})
         .reverse()
-        .map(e => ({ label: e, url: moment(e).format(URL_DATE_FORMAT_ID) })),
+        .map(e => ({ label: e, url: e })),
     };
-    console.log(logger.allData());
+    console.log(
+      logger.allData(),
+      moment('21/10/2018').format(URL_DATE_FORMAT_ID)
+    );
     app.get('/', (req, res) => {
       res.render('home', data);
     });
-    app.get('/:date', (req, res) => {
-      const todayData = logger
-        .getDataFromDay(moment(req.params.date).format(STORAGE_DATE_FORMAT_ID))
+    app.get('/:date(*)', (req, res) => {
+      let todayData: any = logger.getDataFromDay(req.params.date);
+
+      todayData = todayData
+        .advmap(
+          (e, n1) => {
+            return { ...e, duration: n1 ? n1.startTime - e.startTime : 0 };
+          },
+          { nextParamsCount: 1 }
+        )
         .filter(
           e =>
             e.type !== TimeType.WorkSessionStart &&
             e.type !== TimeType.WorkSessionStop
         );
-      console.log(todayData);
+
       data.days = data.days.map(e => ({
         ...e,
         active: e.url === req.params.date,
       }));
-
       res.render('home', {
         ...data,
         currentDay: todayData,

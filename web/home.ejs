@@ -17,18 +17,25 @@
       <thead>
         <tr>
           <th>Type</th>
+          <th>Started</th>
           <th>Time</th>
           <th>Length</th>
         </tr>
       </thead>
       <tbody>
-        <% if(locals.currentDay) {currentDay.forEach(function (data){%>
+        <% if(locals.currentDay) {
+          locals.currentDay.forEach(function (data){%>
         <tr>
-
+          <%=JSON.stringify(data)%>
           <td>
-            include('components/timeTypeTag', {type: data.type});
+            <% include ./components/timeTypeTag %>
           </td>
-          <td>{{ this.length }}</td>
+          <td>
+            <%=moment(data.startTime).format("dddd, MMMM Do YYYY, h:mm:ss a");%>
+          </td>
+          <td>
+            <%=moment.duration(data.duration, 'milliseconds').format('h:mm:ss');%>
+          </td>
 
 
         </tr>

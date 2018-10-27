@@ -1,3 +1,6 @@
-<% if(type == enums.TimeType.Pause) <span class="tag is-info is-medium">Pause</span><% } %>
-<% if(type == enums.TimeType.Work) <span class="tag is-success is-medium">Work</span><% } %>
-<% if(type == enums.TimeType.Break) <span class="tag is-dark is-medium">Break</span><% } %>
+<% if(data.type == enums.TimeType.Pause) { %> <span class="tag is-info is-medium">Pause</span>
+<% } %>
+<% if(data.type == enums.TimeType.Work) { %> <span class="tag is-success is-medium">Work</span>
+<% } %>
+<% if(data.type == enums.TimeType.Break){  %> <span class="tag is-dark is-medium">Break</span>
+<% } %>

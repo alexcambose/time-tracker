@@ -45,14 +45,6 @@
         "title": "Calculate salary"
       },
       {
-        "command": "extension.startWorkLogViewer",
-        "title": "Start work log viewer"
-      },
-      {
-        "command": "extension.stopWorkLogViewer",
-        "title": "Stop work log viewer"
-      },
-      {
         "command": "extension.resetData",
         "title": "Reset time data"
       }
