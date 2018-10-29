@@ -1,11 +1,7 @@
 import app from './server';
 import * as moment from 'moment';
 import 'moment-duration-format';
-import {
-  SERVER_PORT,
-  STORAGE_DATE_FORMAT_ID,
-  URL_DATE_FORMAT_ID,
-} from '../constants';
+import { SERVER_PORT, URL_DATE_FORMAT_ID } from '../constants';
 // import opn from 'opn';
 import { window, ExtensionContext } from 'vscode';
 import Logger from '../Logger';

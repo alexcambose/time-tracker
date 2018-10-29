@@ -1,7 +1,6 @@
 # Time Tracker
+
 [![Build Status](https://travis-ci.org/alexcambose/time-tracker.svg?branch=master)](https://travis-ci.org/alexcambose/time-tracker) [![made-for-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
-
-
 
 This extension allows you to easily track time, break reminders and more.
 
@@ -23,6 +22,8 @@ code --install-extension alexcambose.time-tracker
 - `Stop work session`: stop a work sesstion
 - `Toggle Pause`: Start/Stop pause
 - `Toggle Break`: Start/Stop break
+- `Calculate salary`: Displays how much money you made during the last work session
+- `Reset data`: Erases all data
 
 ## Features
 

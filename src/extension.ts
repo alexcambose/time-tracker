@@ -9,6 +9,7 @@ import {
   SAVE_WORK_SESSIONS_BETWEEN_STARTUPS,
   HOURLY_RATE,
   SALARY_RELATED_WORK_TYPES,
+  SHOULD_TAKE_BREAK_INTERVAL,
 } from './constants';
 import { window, StatusBarAlignment, StatusBarItem } from 'vscode';
 import * as moment from 'moment';
@@ -80,7 +81,7 @@ export class TimeTracker {
       this.breakChecker.check();
       this.setStatusBarText();
       this.logger.workSession++;
-    }, 1000);
+    }, 100);
   };
 
   public clearInterval() {
@@ -241,7 +242,7 @@ export class TimeTracker {
     vscode.window
       .showWarningMessage(
         `You are working for ${this.formatTime(
-          this.logger.workSession,
+          SHOULD_TAKE_BREAK_INTERVAL * 60,
           true
         )}. You should take a break!`,
         'Take a break'
