@@ -49,6 +49,10 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ### 1.0.0
 
+First stable release of _Time Tracker_
+
+### 0.0.1
+
 Initial release of _Time Tracker_
 
 ---
