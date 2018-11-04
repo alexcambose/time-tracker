@@ -37,9 +37,6 @@ export class TimeTracker {
   protected breakMessageShown: boolean = false;
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-    context.globalState.update('workSesstion', 0);
-    context.globalState.update('times', null);
-    console.log(context.globalState);
     this.logger = new Logger(this.context);
     this.breakChecker = new BreakChecker(
       this.displayShouldTakeABreakMessage,
