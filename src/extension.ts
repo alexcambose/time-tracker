@@ -78,6 +78,7 @@ export class TimeTracker {
     this.invervalId = setInterval(() => {
       this.breakChecker.check();
       this.setStatusBarText();
+      this.setStatusBarTooltip();
       this.logger.workSession++;
     }, 1000);
   };

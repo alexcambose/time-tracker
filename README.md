@@ -47,6 +47,10 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ## Release Notes
 
+### 1.0.4
+
+Fixed tooltip updating only when clicked
+
 ### 1.0.3
 
 Removed auto resetting global state functionality
