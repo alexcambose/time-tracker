@@ -17,7 +17,6 @@ import 'moment-duration-format';
 import Logger from './Logger';
 import BreakChecker from './BreakChecker';
 import hourlyRate, { parseHourlyRate } from './hourlyRate';
-import HttpServer from './web/HttpServer';
 
 export function activate(context: vscode.ExtensionContext) {
   const tab = new TimeTracker(context);
@@ -38,6 +37,8 @@ export class TimeTracker {
   protected breakMessageShown: boolean = false;
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
+    context.globalState.update('workSesstion', 0);
+    context.globalState.update('times', null);
     console.log(context.globalState);
     this.logger = new Logger(this.context);
     this.breakChecker = new BreakChecker(
@@ -81,7 +82,7 @@ export class TimeTracker {
       this.breakChecker.check();
       this.setStatusBarText();
       this.logger.workSession++;
-    }, 100);
+    }, 1000);
   };
 
   public clearInterval() {
@@ -89,11 +90,11 @@ export class TimeTracker {
   }
   public togglePause = (): void => {
     // start work session if not started
+
     if (!this.logger.workSession) {
       this.startWorkSession();
       return;
     }
-
     this.paused = !this.paused;
     if (this.inBreak) {
       vscode.window

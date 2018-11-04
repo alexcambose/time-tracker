@@ -2,7 +2,7 @@
   "name": "time-tracker",
   "displayName": "Time tracker",
   "description": "Track your working time",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "alexcambose",
   "bugs": {
     "url": "https://github.com/alexcambose/time-tracker/issues"

@@ -25,6 +25,7 @@ export default class Logger {
   protected saveWorkData(data: ITimeBlock[]): void {
     const oldData = this.allData();
     this.workTimes = [];
+
     this.globalState.update('times', {
       ...oldData,
       [this.getCurrentDay()]: [...this.getDataFromToday(), ...data],
@@ -39,7 +40,7 @@ export default class Logger {
   }
   public getDataFromDay(time: string): ITimeBlock[] | undefined {
     const allData = this.allData();
-    return allData[time] || [];
+    return (allData && allData[time]) || [];
   }
   public allData = () => this.globalState.get('times');
   /**

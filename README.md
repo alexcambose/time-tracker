@@ -47,6 +47,10 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ## Release Notes
 
+### 1.0.2
+
+Fixed a bug where the work session couldn't be started
+
 ### 1.0.1
 
 Fixed the time counter interval
