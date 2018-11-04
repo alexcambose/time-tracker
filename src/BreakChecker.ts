@@ -12,7 +12,7 @@ export default class BreakChecker {
     this.logger = logger;
   }
   public check() {
-    if (!SHOULD_TAKE_BREAK_INTERVAL) {
+    if (parseInt(SHOULD_TAKE_BREAK_INTERVAL) === 0) {
       return;
     }
     // this.logger.workSession is in seconds

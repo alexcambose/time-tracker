@@ -47,6 +47,10 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ## Release Notes
 
+### 1.0.1
+
+Fixed the time counter interval
+
 ### 1.0.0
 
 First stable release of _Time Tracker_

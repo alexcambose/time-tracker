@@ -38,7 +38,7 @@ export class TimeTracker {
   protected breakMessageShown: boolean = false;
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-    console.log(context);
+    console.log(context.globalState);
     this.logger = new Logger(this.context);
     this.breakChecker = new BreakChecker(
       this.displayShouldTakeABreakMessage,
@@ -57,15 +57,15 @@ export class TimeTracker {
     vscode.commands.registerCommand('extension.resetData', this.resetData);
     vscode.commands.registerCommand('extension.togglePause', this.togglePause);
     vscode.commands.registerCommand('extension.toggleBreak', this.toggleBreak);
-    vscode.commands.registerCommand(
-      'extension.startWorkLogViewer',
-      HttpServer.create
-    );
-    HttpServer.create(context);
-    vscode.commands.registerCommand(
-      'extension.stopWorkLogViewer',
-      HttpServer.stop
-    );
+    // vscode.commands.registerCommand(
+    //   'extension.startWorkLogViewer',
+    //   HttpServer.create
+    // );
+    // HttpServer.create(context);
+    // vscode.commands.registerCommand(
+    //   'extension.stopWorkLogViewer',
+    //   HttpServer.stop
+    // );
     vscode.commands.registerCommand(
       'extension.stopWorkSession',
       this.stopWorkSession
@@ -173,12 +173,13 @@ export class TimeTracker {
       );
       return;
     }
-    this.logger.workSession = 0;
+
     vscode.window.showInformationMessage(
-      `Work session stopped! You have worked ${this.formatTime(
+      `Work session stopped! You worked ${this.formatTime(
         this.logger.workSession
       )}`
     );
+    this.logger.workSession = 0;
     this.logger.add(TimeType.WorkSessionStop);
 
     this.paused = false;
